@@ -13,7 +13,7 @@ describe("Timer plugin",function(){
             return Studio.promise.delay(3);
         })();
     });
-    it("must calculate time timeout and reports no error",function(done){
+    it("must calculate time timeout and reports error",function(done){
         Studio.use(Studio.plugin.timer(function(res){
             expect(res.receiver).to.equal('plugin_timer/error');
             expect(res.time).to.gt(-1);

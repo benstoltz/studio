@@ -3,11 +3,13 @@ Studio.js
 
 <img src="http://ericholiveira.com/studio/images/STUDIO_logo.png" align="right" width="300px" />
 
-Micro-services framework for Nodejs.
+Micro services framework for Nodejs.
 
 Studio is a lightweight framework for node development to make easy to create reactive applications according to [reactive manifesto](http://www.reactivemanifesto.org/) principles. It uses micro-services (freely inspired by akka/erlang actors) implemented using [bluebird](https://github.com/petkaantonov/bluebird) a+ promises (or generators async/await) to solve the callback hell problem.
 
-The main goal is to make all systems responsive, fault tolerant, scalable and mantainable. The development with Studio is (and always will be) as easy as possible, i'll keep a concise api, so other developers can create (and share) plugins for the framework.
+Do you want clusterization? Realtime metrics? Easy async programming? Completely decoupled services? Stop worrying about throwing exceptions? Then I've  built this framework for you, because node needs a framework easy to use, yet giving your powerful features like realtime metrics and clusterization with no configuration (service discovery + rpc). Other frameworks relies on "actors", "commands", "brokers" and a lot of other complicated concepts, studio deals only with functions and promises, if you know both concepts you're ready to use and master it.
+
+The main goal is to make all systems responsive, fault tolerant, scalable and maintainable. The development with Studio is (and always will be) as easy as possible, i'll keep a concise api, so other developers can create (and share) plugins for the framework.
 
 The plugin system and the decoupled nature of it enables you to have real time metrics in your services , [ZERO CONFIGURATION CLUSTERIZATION ON DISTRIBUTED MACHINES](#cluster) and other improvements for your services.
 
@@ -16,10 +18,13 @@ Studio isn't only a library, it's a framework. It's really important to learn ho
 I would love to receive feedback.Let me know if you've used it. What worked and what is wrong. Contribute and spread the word.
 
 
+Wants to learn more???? Click here to join our slack channel 
+
+[![Join the StudioJS chat](https://studiojs.herokuapp.com/badge.svg)](https://studiojs.herokuapp.com/)
+
 [![Build Status](https://travis-ci.org/ericholiveira/studio.svg?branch=master)](https://travis-ci.org/ericholiveira/studio)
 [![npm version](https://badge.fury.io/js/studio.svg)](http://badge.fury.io/js/studio)
 [![Dependency Status](https://david-dm.org/ericholiveira/studio.svg)](https://david-dm.org/ericholiveira/studio)
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/onstagejs/studio?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![NPM](https://nodei.co/npm/studio.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/studio/)
 
@@ -34,6 +39,7 @@ Table of contents
 - [Modules / namespacing](#modules)
 - [Co / Generators and flow-control](#generators)
 - [Proxy](#proxy)
+- [Es6 Class](#es6-class)
 - [Plugins](#plugins)
 - [Filters](#filters)
 - [Timeouts](#timeouts)
@@ -41,6 +47,7 @@ Table of contents
 - [Clustering](#cluster)
 - [TODO](#todo)
 - [Pro tips](#pro-tips)
+- [From Zero To Hero](#from-zero-to-hero)
 - [Dependencies](#dependencies)
 - [Build](#build)
 - [Test](#test)
@@ -56,15 +63,15 @@ To install execute:
 Intro
 ========
 
-We all want our systems to be responsive, scalable, fault tolerant, mantainable and for the last, but not least, easy and fun to develop. With this goals in mind i decided to build a [micro-services](http://martinfowler.com/articles/microservices.html) framework for nodejs using and architecture freely inspired on [actors model](http://en.wikipedia.org/wiki/Actor_model). I present you [Studio](https://github.com/ericholiveira/studio)
+We all want our systems to be responsive, scalable, fault tolerant, maintainable and for the last, but not least, easy and fun to develop. With this goals in mind i decided to build a [micro-services](http://martinfowler.com/articles/microservices.html) framework for nodejs using and architecture freely inspired on [actors model](http://en.wikipedia.org/wiki/Actor_model). I present you [Studio](https://github.com/ericholiveira/studio)
 
-Studio makes easy to create code without ANY dependency between your services, so you can deploy all in a single machine or just easily change to each one in a different machine or anything in between. It also enables operations timeouts, zero-downtime reload, let-it-crash approach (stop to be affraid of exceptions, Studio handles it to you), plugins and makes it nearly impossible to falls in a callback hell. Supports any web framework (we have examples with express) and helps you with flow-control using [bluebird](https://github.com/petkaantonov/bluebird).
+Studio makes easy to create code without ANY dependency between your services, so you can deploy all in a single machine or just easily change to each one in a different machine or anything in between. It also enables operations timeouts, zero-downtime reload, let-it-crash approach (stop to be afraid of exceptions, Studio handles it to you), plugins and makes it nearly impossible to falls in a callback hell. Supports any web framework (we have examples with express) and helps you with flow-control using [bluebird](https://github.com/petkaantonov/bluebird).
 
-Studio encourages you to use the best pratices of nodejs, it helps you to write simple, clean and completely decoupled code. And makes it very easy and fun.
+Studio encourages you to use the best practices of nodejs, it helps you to write simple, clean and completely decoupled code. And makes it very easy and fun.
 
 First of all, everything in a Studio-based application is a service.
 
-So if you're used to build SOA or micro-services all your services (and possible layers, as DAOs for instance) are going to be declared as a STATELESS SINGLETON services. Services have an unique identifier and communicate (always) asynchronously through message passing. The benefits of this approach is that it is really easy to take just some of your servers to different servers and make a better use of it. Also, your services have the free benefit of being naturally indempotent (each service receives a COPY of the message, so one service can't mess with the objects of another service) increasing your code security.
+So if you're used to build SOA or micro-services all your services (and possible layers, as DAOs for instance) are going to be declared as a STATELESS SINGLETON services. Services have an unique identifier and communicate (always) asynchronously through message passing. The benefits of this approach is that it is really easy to take just some of your servers to different servers and make a better use of it. Also, your services have the free benefit of deep copying the parameters before the message is delivered (so one service can't mess with the objects of another service) increasing your code security.
 
 And this is it... this is all you need to create [reactive](http://reactivemanifesto.org) applications.
 
@@ -73,15 +80,15 @@ Why
 
 Now you might be wondering why systems created with Studio can be called a reactive system. As stated by the [reactive manifesto](http://www.reactivemanifesto.org/), reactive systems are those who follow 4 principles:
 
-- Reponsive : 
+- Responsive : 
 > Responsive systems focus on providing rapid and consistent response times, establishing reliable upper bounds so they deliver a consistent quality of service.
 
-Using Studio you just add a thin layer over your functions without comprimising the responsiveness while giving you the power to interact with your application in runtime as in [aspect-oriented programming](https://en.wikipedia.org/wiki/Aspect-oriented_programming)
+Using Studio you just add a thin layer over your functions without compromising the responsiveness while giving you the power to interact with your application in runtime as in [aspect-oriented programming](https://en.wikipedia.org/wiki/Aspect-oriented_programming)
 
 - Resilient :
 > The system stays responsive in the face of failure. This applies not only to highly-available, mission critical systems any system that is not resilient will be unresponsive after a failure. 
 
-This is critical for thoses using nodejs, Studio enforces you to use the best pratices to avoid your process or any of workers to crash. And as all your services are written with async flow in mind (and idempotence) it also makes easy to add redundance
+This is critical for thoses using nodejs, Studio enforces you to use the best practices to avoid your process or any of workers to crash. And as all your services are written with async flow in mind it also makes easy to add redundance
 
 - Elastic : 
 > The system stays responsive under varying workload.
@@ -188,7 +195,7 @@ Follow the link to see all available [examples](https://github.com/ericholiveira
 
 Studio works with any web framework.
 
-Here i'm going to put just a basic hello world with express, on [examples](https://github.com/ericholiveira/studio/tree/master/examples) folder you can see the best pratices and more pratical examples ( with promises, errors, filters...):
+Here i'm going to put just a basic hello world with express, on [examples](https://github.com/ericholiveira/studio/tree/master/examples) folder you can see the best practices and more practical examples ( with promises, errors, filters...):
 ```js
 var express = require('express');
 var Studio = require('studio'); //require Studio namespace
@@ -349,6 +356,33 @@ allServices.myFirstServiceWithGenerator().then(function(result){
 });
 ```
 
+Es6 Class
+========
+
+If you're running on node >=4 or using --harmony flag, you can create your services easier:
+```js
+var Studio = require('studio');
+class Foo{
+	bar(){
+		return this.hello();
+	}
+	hello(){
+		return 'hello';
+	}
+	useExternal(){
+		var someExternalService = Studio('someExternalService');
+		return someExternalService();
+	}
+}
+Studio.serviceClass(Foo);
+
+//To acess from outside or other classes
+var fooModule = Studio.module('Foo');
+var barService = fooModule('bar');
+barService();
+```
+
+This way Studio automatically creates a namespace with the class name and a service for each function of this class
 
 Plugins
 ========
@@ -359,7 +393,7 @@ Plugins lets you have full control of whats going on with your services, this wa
 	Studio.use(MY_SUPER_COOL_PLUGIN);
 ```
 
-Plugins can listen to services creation and destruction(this way you can intercept messages). The officially mantained plugins are available under Studio.plugin parameter. You can check the [tests folder](https://github.com/ericholiveira/studio/tree/master/tests) to understand better how to use plugins.
+Plugins can listen to services creation and destruction(this way you can intercept messages). The officially maintained plugins are available under Studio.plugin parameter. You can check the [tests folder](https://github.com/ericholiveira/studio/tree/master/tests) to understand better how to use plugins.
 
 Studio.use method also receives an optional second parameter to filter the services that are going to receive the plugin this filter can be a string (to match only the service with that name), a regular expression, an array of strings or a function as:
 
@@ -418,26 +452,32 @@ Real time metrics
 =================
 
 One of the cool things you can do with Studio plugins is to have real time metrics of all your services, if you want to log
-the time needed to execute on every call of every service you can do it easily with the timer plugin. This plugin also
-shows you the power you can take from custom plugin and [aspect programming](https://en.wikipedia.org/wiki/Aspect-oriented_programming)
+the time needed to execute every call of every service you can do it easily with the timer plugin. This plugin also
+shows you the power you can get from a custom plugin and [aspect-oriented programming](https://en.wikipedia.org/wiki/Aspect-oriented_programming)
+
+The timer plugin uses process.hrtime() for sub-millisecond precision.
 
 ```js
 var Studio = require('studio');
+
 Studio.use(Studio.plugin.timer(function(res){
     /*
-    here you define what to do with the execution info, now we are going just to print in the console, but
-    in production you probably will wants to send it to statsd of some other metric aggregator
-    */
-    console.log(res);//Prints the time taken on service execution and other infos
+     * Here you define what to do with the execution info, now we are going just to print in the console, but
+     * in production you could send it to statsd or some other metric aggregator.
+     */
+    console.log('The receiver %s took %d ms to execute', res.receiver, res.time);
 }));
+
 Studio(function myService(){
 	var randomTime = Math.floor(Math.random()*100);
+
+    // Time in milliseconds
     return Studio.promise.delay(randomTime);
-});//Time in milliseconds
+});
 
 var myServiceRef = Studio('myService');
 
-setInterval(myServiceRef,500);
+setInterval(myServiceRef, 500);
 ```
 
 Cluster
@@ -454,7 +494,18 @@ Pro tips
 ========
 
 - The most important tip is LEARN HOW TO DEAL WITH A+ PROMISES, i think this [blog](https://blog.domenic.me/youre-missing-the-point-of-promises/) have a incredible explanation of what A+ promises means and how it saves you from callback hell
-- All your services must be [idempotent](http://en.wikipedia.org/wiki/Idempotence) , Studio helps you to achieve this delivering to each service a copy of the original message. Stop keep states on your code.
+- You should avoid mutatins states , Studio helps you to achieve this delivering to each service a copy of the original message.
+
+From Zero To Hero
+========
+
+I've also started a series of posts on my medium explaining the motivation and creating a small project with studio
+
+[Nodejs microservices. From Zero to Hero Pt1 - Motivation](https://medium.com/@ericholiveira/nodejs-microservices-from-zero-to-hero-pt1-279548cb4080)
+
+[Nodejs microservices. From Zero to Hero Pt2 - Basic Usage](https://medium.com/@ericholiveira/nodejs-microservices-from-zero-to-hero-pt2-72fbb2a1b1c4#.dpz6adn7c)
+
+[Nodejs microservices. From Zero to Hero Pt3 - Plugins and cluster](https://medium.com/@ericholiveira/nodejs-microservices-from-zero-to-hero-pt1-plugins-and-clustering-ddb60e9a8ee0#.v3m1jh2l5)
 
 Dependencies
 ========

@@ -1,8 +1,9 @@
+var isNode=new Function("try {return this===global;}catch(e){return false;}");
 var calculateResult = function(start,receiver,err){
   "use strict";
-    var end = Date.now();
+    var end = process.hrtime(start);
     return {
-        time:end - start,
+        time:(end[0] * 1e9 + end[1]) / 1e6,
         receiver:receiver,
         err:err
     };
@@ -10,18 +11,20 @@ var calculateResult = function(start,receiver,err){
 module.exports = function(fn) {
   "use strict";
     return function (options) {
+      if(isNode){
         options.onStart(function (serv) {
-            var _fn = serv.fn;
-            serv.fn = function(){
-              var start = Date.now();
-              return _fn.apply(serv,arguments).then(function (res) {
-                fn(calculateResult(start,serv.id));
-                return res;
-              }).catch(function(err){
-                fn(calculateResult(start,serv.id,err));
-                throw err;
-              });
-            };
+          var _fn = serv.fn;
+          serv.fn = function(){
+            var start = process.hrtime();
+            return _fn.apply(serv,arguments).then(function (res) {
+              fn(calculateResult(start,serv.id));
+              return res;
+            }).catch(function(err){
+              fn(calculateResult(start,serv.id,err));
+              throw err;
+            });
+          };
         });
+      }
     };
 };
